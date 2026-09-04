@@ -276,8 +276,7 @@ function drawTeacher(code){
 
   const lanes=teams.map(t=>{
     const pw=Math.min(100,t.peace_pts/PEACE_WIN*100);
-    const nk=t.exposed?`<div class="filln" style="width:${Math.min(100,t.nuke_shown/NUKE_WIN*100)}%"></div>`
-                      :`<div class="fog"></div>`;
+    const nk=`<div class="filln" style="width:${Math.min(100,t.nuke_shown/NUKE_WIN*100)}%"></div>`;
     return `<div class="lane${t.exposed?' hot':''}">
       <div class="who"><div class="cty">${esc(t.country)}</div>
         <div class="tier">${esc(t.group_label)} · ${esc(t.tier)}</div></div>
@@ -287,7 +286,7 @@ function drawTeacher(code){
       </div>
       <div class="val">${t.peace_pts}
         <i>${g.phase==='submit'?(done.has(t.id)?'제출 완료':'대기 중')
-           :(t.exposed?`핵 ${t.nuke_shown}`:'&nbsp;')}</i></div>
+           :`핵 ${t.nuke_shown}${t.exposed?'':' (비공개)'}`}</i></div>
     </div>`;}).join('');
 
   const B=(id,l,ok=true,gh=false)=>`<button class="btn${gh?' ghost':''}" id="${id}"${ok?'':' disabled'}>${l}</button>`;
@@ -308,7 +307,7 @@ function drawTeacher(code){
   <div class="legend">
     <span><b style="background:var(--peace)"></b>평화 포인트 · 목표 ${PEACE_WIN}</span>
     <span><b style="background:var(--nuke)"></b>핵 포인트 · 목표 ${NUKE_WIN}</span>
-    <span><b style="background:#C6D0D4"></b>비공개 · ${EXPOSE_AT}점을 넘으면 핵실험이 탐지되어 공개</span>
+    <span><b style="background:var(--nuke)"></b>교사에게는 항상 공개 · ${EXPOSE_AT}점을 넘으면 학생들에게도 핵실험 탐지로 공개</span>
   </div>
 
   <hr class="rule">
