@@ -247,9 +247,13 @@ function newGame(msg){el(`<div class="narrow"><h1>새 게임 만들기</h1>${msg
     <option value="2">2모둠 — 강대국1 · 약소국1</option></select></div>
   <button class="btn wide" id="mk">만들기</button>
   <p class="small muted" style="margin-top:13px">교사 코드는 잊으면 게임을 이어갈 수 없으니 적어두세요.</p></div>`);
-  on('mk',async()=>{const code=val('cd').trim();
+  let mkBusy=false;
+  on('mk',async()=>{if(mkBusy)return;mkBusy=true;
+    const btn=document.getElementById('mk');if(btn)btn.disabled=true;
+    const code=val('cd').trim();
     try{await rpc('gg_create_game',{p_title:val('ti').trim(),p_admin_code:code,p_team_count:+val('tc')});
-      setH({t:code,n:'',s:''});route();}catch(e){newGame(e.message);}});}
+      setH({t:code,n:'',s:''});route();}
+    catch(e){mkBusy=false;newGame(e.message);}});}
 
 /* ══════════ 교사 ══════════ */
 let tS=null,tT=null,spin=false,angle=0,sig='',lastR=null;
