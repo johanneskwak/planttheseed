@@ -1,5 +1,6 @@
 {
   "rewrites": [
-    { "source": "/foreignpolicy", "destination": "/foreignpolicy/index.html" }
+    { "source": "/foreignpolicy", "destination": "/foreignpolicy/index.html" },
+    { "source": "/newforeignpolicy", "destination": "/newforeignpolicy/index.html" }
   ]
 }

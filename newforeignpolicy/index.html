@@ -1,0 +1,720 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>마지막 합의 | 핵확산 시뮬레이션</title>
+<meta name="theme-color" content="#080f18">
+<meta name="description" content="사회② 국제사회의 갈등과 협력 — 가상 국가의 대표가 되어 선택하는 핵확산 시뮬레이션">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#E6EAED; --card:#F4F6F7; --ink:#12212E; --ink-2:#4C6069; --rule:#A6B2BB;
+  --chamber:#16283A; --gold:#A8873C;
+  --peace:#2E6E9E; --nuke:#B0402C; --neu:#8A9499;
+  --r:2px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);
+  font-family:'IBM Plex Sans KR',-apple-system,BlinkMacSystemFont,sans-serif;
+  font-size:16px;line-height:1.55;font-variant-numeric:tabular-nums;-webkit-text-size-adjust:100%}
+.disp{font-family:'Black Han Sans',sans-serif;font-weight:400;letter-spacing:-.01em}
+h1{font-family:'Black Han Sans',sans-serif;font-size:1.7rem;margin:0 0 .3rem;font-weight:400}
+h2{font-family:'Black Han Sans',sans-serif;font-size:1.05rem;margin:0 0 .6rem;font-weight:400}
+.wrap{max-width:1120px;margin:0 auto;padding:18px 18px 72px}
+.narrow{max-width:500px}
+.muted{color:var(--ink-2)} .small{font-size:.82rem}
+hr.rule{border:0;border-top:1px solid var(--rule);margin:24px 0}
+a{color:var(--peace)}
+
+button{font:inherit;cursor:pointer;border-radius:var(--r)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--peace);outline-offset:2px}
+.btn{background:var(--ink);color:#fff;border:1px solid var(--ink);padding:.6rem 1.05rem;font-weight:500}
+.btn:hover{background:#1B333D}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--rule)}
+.btn.ghost:hover{background:#D7DEE1}
+.btn.danger{background:var(--nuke);border-color:var(--nuke)}
+.btn:disabled{opacity:.34;cursor:not-allowed}
+.btn.wide{width:100%}
+.row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+input,select{font:inherit;padding:.58rem .7rem;border:1px solid var(--rule);border-radius:var(--r);background:#fff;width:100%;color:var(--ink)}
+label{display:block;font-size:.84rem;color:var(--ink-2);margin:0 0 .25rem}
+.field{margin-bottom:13px}
+.panel{background:var(--card);border:1px solid var(--rule);border-radius:var(--r);padding:15px}
+.err{background:#F4DED9;border-left:3px solid var(--nuke);color:#7C2C1E;padding:.6rem .8rem;margin:12px 0;font-size:.9rem}
+.note{background:var(--card);border-left:3px solid var(--peace);padding:.6rem .8rem;margin:12px 0;font-size:.9rem}
+.resolution{border:1px solid var(--gold);border-top:4px solid var(--gold);background:#FBF8F1;
+  border-radius:var(--r);padding:15px 17px;margin-top:14px}
+.resolution h2{color:#6E5A22;letter-spacing:.02em}
+.ballot{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.ballot button{flex:1;min-width:180px;padding:.75rem 1rem;background:#fff;border:1px solid var(--rule);
+  border-left:5px solid var(--rule);text-align:left;font-weight:500}
+.ballot button:hover{background:var(--card)}
+.ballot .bn{border-left-color:var(--nuke)} .ballot .bp{border-left-color:var(--peace)}
+.ballot small{display:block;font-weight:400;color:var(--ink-2);font-size:.74rem;margin-top:2px}
+
+/* ── 헤더 ── */
+.banner{background:var(--chamber);color:#EEF2F4;border-radius:var(--r);
+  border-bottom:3px solid var(--gold);padding:14px 18px;display:flex;
+  justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:4px}
+.banner .seal{flex:0 0 auto}
+.banner .ttl{display:flex;align-items:center;gap:13px}
+.banner .turn{font-family:'Black Han Sans',sans-serif;font-size:1.7rem;line-height:1.05}
+.banner .turn span{font-size:.95rem;color:#9FB3C2;font-family:'IBM Plex Sans KR',sans-serif;font-weight:400}
+.banner .sub{font-size:.74rem;color:#8FA5B5;margin-top:3px;letter-spacing:.02em}
+.hdr{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;
+  border-bottom:3px solid var(--ink);padding-bottom:12px;margin-bottom:6px}
+.hdr .turn{font-family:'Black Han Sans',sans-serif;font-size:2.1rem;line-height:1}
+.hdr .turn span{color:var(--ink-2);font-size:1.1rem}
+.hdr .sub{font-size:.8rem;color:var(--ink-2);margin-top:2px}
+.stats{display:flex;gap:10px;align-items:flex-start}
+.stat{text-align:center;border:1px solid var(--rule);border-radius:var(--r);padding:6px 14px 7px;background:#fff;min-width:96px}
+.stat b{font-family:'Black Han Sans',sans-serif;font-size:2.4rem;line-height:1;display:block}
+.stat span{font-size:.72rem;color:var(--ink-2);display:block;margin-top:2px;white-space:nowrap}
+.stat.nu{border-color:var(--nuke)} .stat.nu b{color:var(--nuke)}
+.stat.pe{border-color:var(--peace)} .stat.pe b{color:var(--peace)}
+.stats .memo{font-size:.68rem;color:var(--ink-2);align-self:flex-end;max-width:128px;line-height:1.35;text-align:left}
+.banner .memo{color:#8FA5B5}
+
+/* ── 턴 진행 눈금 ── */
+.pips{display:flex;gap:3px;margin:22px 0 20px}
+.pip{flex:1;height:9px;background:#CBD5D8;border-radius:1px;position:relative}
+.pip.on{background:var(--ink)}
+.pip.now{background:var(--peace);box-shadow:0 0 0 2px rgba(47,111,143,.28)}
+.pip.un::after{content:'UN';position:absolute;top:-15px;left:50%;transform:translateX(-50%);
+  font-size:.6rem;letter-spacing:.05em;color:var(--peace);font-weight:600}
+.pip.un{background:#B4C3C8}.pip.un.on{background:var(--peace)}
+
+/* ── 레이스 레인 (신호 요소) ── */
+.floor{background:linear-gradient(#D6DEE3,#EAEEF0);border:1px solid #9DACB6;
+  border-radius:var(--r);padding:13px 17px 8px;margin-top:12px;
+  box-shadow:inset 0 1px 0 #F2F5F6}
+.lane{display:grid;grid-template-columns:minmax(104px,164px) 1fr 74px;gap:14px;align-items:center;
+  padding:8px 0;border-bottom:1px solid rgba(166,178,187,.5)}
+.lane:last-of-type{border-bottom:0}
+.lane.colhead{font-size:.72rem;color:var(--ink-2);letter-spacing:.03em;padding:0 0 7px;
+  border-bottom:2px solid var(--ink)}
+.plate{background:#FAFBFB;border:1px solid #97A6B0;border-top:3px solid var(--pc,#888);
+  border-radius:1px;padding:6px 9px 5px;box-shadow:0 1px 0 rgba(18,33,46,.16)}
+.plate .cty{font-family:'Black Han Sans',sans-serif;font-size:1.08rem;line-height:1.1;letter-spacing:.01em}
+.plate .tier{font-size:.66rem;color:var(--ink-2);letter-spacing:.04em;margin-top:1px}
+.gauges{display:flex;flex-direction:column;gap:4px}
+.strip{position:relative;border-radius:1px;overflow:hidden}
+.strip.p{height:22px;background:#CFD9DD}
+.strip.n{height:11px;background:#CFD9DD}
+.fillp{position:absolute;inset:0 auto 0 0;background:var(--peace);transition:width .8s cubic-bezier(.2,.7,.3,1)}
+.filln{position:absolute;inset:0 auto 0 0;background:var(--nuke);transition:width .8s cubic-bezier(.2,.7,.3,1)}
+.fog{position:absolute;inset:0;background-image:repeating-linear-gradient(115deg,
+  #B7C3C7 0 6px, #C6D0D4 6px 12px)}
+.fog::after{content:'비공개';position:absolute;left:7px;top:50%;transform:translateY(-50%);
+  font-size:.62rem;color:#5E7079;letter-spacing:.08em}
+.goal{position:absolute;top:0;bottom:0;width:2px;background:var(--ink);right:0}
+.lane .val{text-align:right;font-family:'Black Han Sans',sans-serif;font-size:1.5rem;line-height:1}
+.lane .val i{display:block;font-style:normal;font-family:'IBM Plex Sans KR',sans-serif;
+  font-size:.7rem;color:var(--ink-2);line-height:1.3;margin-top:3px}
+.lane.hot .plate{border-color:var(--nuke);background:#FBF0ED}
+.lane.hot .val i{color:var(--nuke)}
+.legend{display:flex;gap:16px;font-size:.74rem;color:var(--ink-2);margin:8px 0 0}
+.legend b{display:inline-block;width:11px;height:11px;vertical-align:-1px;margin-right:4px;border-radius:1px}
+
+/* ── 학생 ── */
+.flag{height:8px;margin-bottom:12px;border-radius:1px}
+.mine{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.mg{border:1px solid var(--rule);border-radius:var(--r);padding:12px 13px;background:#fff}
+.mg.secret{background:repeating-linear-gradient(115deg,#F3F6F6 0 8px,#EAEFF0 8px 16px);
+  border-style:dashed;border-color:var(--nuke)}
+.mg .lbl{font-size:.74rem;color:var(--ink-2)}
+.mg .v{font-family:'Black Han Sans',sans-serif;font-size:2.3rem;line-height:1.05}
+.mg.pub .v{color:var(--peace)} .mg.secret .v{color:var(--nuke)}
+.mg .of{font-size:.72rem;color:var(--ink-2)}
+.mini-bar{height:5px;background:#CFD9DD;border-radius:1px;margin-top:7px;overflow:hidden}
+.mini-bar i{display:block;height:100%}
+.choices{display:grid;gap:10px;margin-top:4px}
+.choice{border:1px solid var(--rule);border-left:6px solid var(--rule);background:#fff;
+  border-radius:var(--r);padding:14px 16px;text-align:left;width:100%;transition:transform .07s}
+.choice:active{transform:scale(.99)}
+.choice .t{font-family:'Black Han Sans',sans-serif;font-size:1.25rem;line-height:1.2}
+.choice .d{font-size:.83rem;color:var(--ink-2);margin-top:1px}
+.choice.pe{border-left-color:var(--peace)} .choice.ne{border-left-color:var(--neu)}
+.choice.nu{border-left-color:var(--nuke)}
+.choice:disabled{opacity:.4}
+.state{text-align:center;padding:34px 14px}
+.state .k{font-family:'Black Han Sans',sans-serif;font-size:1.9rem;line-height:1.2}
+.log{border-left:3px solid var(--rule);padding-left:11px;margin:10px 0}
+.log div{font-size:.83rem;padding:2px 0}
+.hit{color:var(--peace);font-weight:600} .miss{color:var(--nuke);font-weight:600}
+
+table.t{width:100%;border-collapse:collapse;font-size:.85rem;background:#fff}
+table.t th,table.t td{border:1px solid var(--rule);padding:.42rem .5rem;text-align:center}
+table.t th{background:var(--card);font-weight:600}
+
+/* ── 룰렛 ── */
+.setup{display:grid;grid-template-columns:296px 1fr;gap:26px;align-items:start}
+@media(max-width:760px){.setup{grid-template-columns:1fr}}
+.wheelbox{position:relative;width:296px;height:296px;margin:0 auto}
+.wheelbox svg{width:100%;height:100%;transition:transform 4.2s cubic-bezier(.13,.72,.16,1)}
+.needle{position:absolute;top:-4px;left:50%;transform:translateX(-50%);width:0;height:0;
+  border-left:10px solid transparent;border-right:10px solid transparent;border-top:19px solid var(--ink);z-index:2}
+.slot{display:grid;grid-template-columns:62px 1fr 74px 44px;gap:9px;align-items:center;
+  padding:7px 9px;border:1px solid var(--rule);background:#fff;margin-bottom:5px;border-radius:var(--r)}
+.slot.done{background:var(--card)}
+.sw{width:12px;height:12px;border-radius:1px;display:inline-block;vertical-align:-1px;margin-right:5px}
+.code{font-family:ui-monospace,Menlo,monospace;font-size:1.02rem;letter-spacing:.12em;font-weight:600}
+.qr svg{width:42px;height:42px;display:block}.qrbig svg{width:124px;height:124px;display:block}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+@media(max-width:640px){
+  .lane{grid-template-columns:82px 1fr 58px;gap:9px}
+  .lane .who .cty{font-size:.92rem}.lane .val{font-size:1.1rem}
+  .hdr .turn{font-size:1.5rem}.kcount b{font-size:2.2rem}
+  .mine{grid-template-columns:1fr}
+}
+</style>
+<style>/* THE LAST ACCORD — strategy-room interface */
+:root{color-scheme:dark;--paper:#080f18;--card:#111e2b;--ink:#ecf1f4;--ink-2:#a6bacb;--rule:#2d4154;--chamber:#102031;--gold:#d8b570;--peace:#70d8c7;--nuke:#f38e7e;--neu:#a4b7cf;--r:6px;--art-room:url('room.webp');--art-portraits:url('leaders.webp')}
+body{background:radial-gradient(ellipse at 20% 0,#193043 0,transparent 48%),#080f18;min-height:100vh;font-family:'IBM Plex Sans KR','Malgun Gothic',sans-serif;line-height:1.65}
+h1,h2,.disp,.banner .turn,.mg .v,.lane .val,.plate .cty,.choice .t,.state .k{font-family:'IBM Plex Sans KR','Malgun Gothic',sans-serif;font-weight:600}
+h1{font-size:2rem;letter-spacing:-.05em}h2{font-size:1.1rem}.small,label,.banner .sub,.mg .lbl,.mg .of,.legend,.plate .tier,.stat span,.choice .d,.log div{font-size:.875rem}.wrap{max-width:1360px;padding:0 32px 70px}.narrow{max-width:560px;margin:48px auto;padding:28px;background:var(--card);border:1px solid var(--rule)}
+.topbar{min-height:82px;display:flex;align-items:center;justify-content:space-between;gap:20px;border-bottom:1px solid var(--rule);margin-bottom:28px}.brand{display:flex;align-items:center;gap:13px;color:var(--ink);text-decoration:none}.brand strong{display:block;font-size:15px;letter-spacing:.16em}.brand small{display:block;color:var(--ink-2);font-size:12px;letter-spacing:.08em}.top-actions{display:flex;align-items:center;gap:10px}.top-actions span{font-size:13px;color:var(--ink-2)}.top-actions button{border:1px solid var(--rule);background:transparent;padding:7px 12px;color:var(--ink-2)}
+.btn{background:var(--gold);border-color:var(--gold);color:#111b25;padding:12px 20px;font-weight:600;transition:background .2s,transform .2s}.btn:hover{background:#f0cd86;transform:translateY(-1px)}.btn.ghost{color:var(--ink);border-color:#40586e;background:#162536}.btn.ghost:hover{background:#253b50}.btn.danger{background:#8d3f36;color:white}.btn:disabled{opacity:.42;transform:none}.btn.wide{margin-top:5px}
+input,select{background:#091523;color:var(--ink);border-color:#39526b;padding:12px 14px}input::placeholder{color:#6f879c}input:focus,select:focus{border-color:var(--peace)}button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var(--gold);outline-offset:4px}summary{cursor:pointer}button:disabled{cursor:not-allowed}.panel{padding:20px;background:linear-gradient(130deg,#172939,#101d2a)}
+.eyebrow{color:var(--gold);font-size:12px;letter-spacing:.18em;font-weight:600}.section-title{display:flex;justify-content:space-between;gap:16px;align-items:center;margin:30px 0 14px}.section-title h2{margin:0}.section-title span{font-size:13px;color:var(--ink-2)}
+.lobby{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(320px,1fr);gap:24px}.lobby-scene{position:relative;min-height:485px;overflow:hidden;border:1px solid #435262;border-radius:8px;background-image:linear-gradient(0deg,#081522 0%,rgba(8,21,34,.85) 26%,rgba(8,21,34,.02) 80%),var(--art-room);background-position:center;background-size:cover}.scene-content{position:absolute;bottom:0;padding:32px;max-width:590px}.scene-content h1{font-size:clamp(2.2rem,4vw,3.5rem);line-height:1.18;letter-spacing:-.055em;margin:12px 0 18px}.scene-content h1 em{color:var(--gold);font-style:normal}.scene-content p{color:#c5d4e0;margin:0;max-width:420px}.scene-badge{position:absolute;left:22px;top:20px;padding:5px 10px;border:1px solid #688075;color:#c7dcd3;background:#0a1723cc;font-size:12px;letter-spacing:.08em}.scenario-meta{display:flex;gap:25px;margin-top:24px;font-size:14px;color:#b7c9d7}.scenario-meta b{color:#fff;margin-right:5px}
+.entry-panel{border:1px solid var(--rule);padding:27px;background:linear-gradient(145deg,#192b3d,#101b28);border-radius:8px}.entry-panel h2{font-size:1.45rem;margin:7px 0 5px}.entry-panel p{margin:0 0 19px}.entry-panel #jc{letter-spacing:.5em;font-size:1.4rem}.entry-panel hr{margin:24px 0}.entry-panel .row .btn{flex:1;padding:10px}.entry-panel .demo-link{display:block;width:100%;background:transparent;border:0;color:var(--peace);margin:17px 0 0;padding:5px;font-size:14px;text-decoration:underline;text-underline-offset:5px}
+.delegations{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}.delegate{overflow:hidden;background:#122131;border:1px solid #34495b;border-top:2px solid var(--nation,var(--gold));padding:0;text-align:left;color:var(--ink);border-radius:5px;transition:transform .2s,border-color .2s}.delegate:hover{transform:translateY(-4px);border-color:var(--gold)}.portrait{background-image:var(--art-portraits);background-size:300% 200%;background-repeat:no-repeat;background-position:var(--px) var(--py);display:block;aspect-ratio:1 / 1;background-color:#172637}.delegate .portrait{position:relative}.delegate-info{padding:12px}.delegate-info .country{font-size:13px;color:var(--ink-2)}.delegate-info strong{font-size:16px;display:block;margin:3px 0}.delegate-info .rank{font-size:13px;color:var(--gold)}.portrait.mini{width:48px;height:48px;aspect-ratio:auto;border:1px solid #556675;border-radius:4px;flex-shrink:0}.roster-foot{color:#839aaf;font-size:13px;margin:13px 0}.objective-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:22px}.objective{border-left:2px solid var(--gold);padding:4px 16px}.objective strong{display:block;font-size:15px}.objective p{font-size:14px;color:var(--ink-2);margin:4px 0}
+.banner{border:1px solid var(--rule);border-left:3px solid var(--gold);background:linear-gradient(110deg,#203448,#12202f);padding:23px 24px;margin-bottom:12px;box-shadow:0 10px 40px #0002}.banner .turn{font-size:1.6rem;line-height:1.4}.banner .sub{color:#b4c4d2;margin-top:6px}.stat{background:#0c1927;border-color:#365067}.stat b{font-family:inherit;font-size:2rem}.stats .memo{font-size:12px;max-width:150px}.pips{margin:28px 0 20px;gap:6px}.pip{height:6px;background:#263a4c}.pip.on{background:var(--gold)}.pip.now{background:var(--peace)}.pip.un{background:#385569}.pip.un::after{font-size:12px;top:-20px}
+.situation{position:relative;border:1px solid #3c5062;min-height:215px;padding:30px;display:flex;align-items:flex-end;border-radius:6px;margin:18px 0;background-image:linear-gradient(90deg,#081522f2,#081522b8 50%,#08152240),var(--art-room);background-size:cover;background-position:center 43%}.situation h2{font-size:1.65rem;margin:8px 0}.situation p{margin:0;color:#bdcddb;max-width:650px}.situation .eyebrow{color:var(--peace)}
+.floor{padding:16px 22px;background:#101d2b;border-color:#344a5f;box-shadow:none}.lane{grid-template-columns:minmax(195px,240px) 1fr 85px;padding:13px 0;gap:22px;border-color:#293c4d}.lane.colhead{font-size:14px;border-bottom:1px solid var(--rule)}.plate{background:#192b3c;border:1px solid #3b5266;border-left:3px solid var(--pc);border-top:1px solid #3b5266;box-shadow:none;display:flex;align-items:center;gap:10px;padding:9px}.plate .cty{font-size:1rem;line-height:1.5}.plate .tier{font-size:12px}.lane.hot .plate{background:#382a2c;border-color:#ab615a}.lane .val{font-size:1.7rem}.lane .val i{font-size:12px}.strip.p{background:#243748;height:16px}.strip.n{background:#243748;height:13px}.fillp{background:linear-gradient(90deg,#398f8b,#75d5c5)}.filln{background:linear-gradient(90deg,#9b4c43,#f08e7b)}.fog{background:repeating-linear-gradient(115deg,#263a4e 0 6px,#1b2d3f 6px 12px)}.fog::after{font-size:12px;color:#9aacbf}.legend{flex-wrap:wrap;font-size:13px;gap:8px 20px;margin:14px 0}.goal{background:#a2b8c8}.flag{height:3px;margin:0 0 12px}
+.command-brief{display:grid;grid-template-columns:160px minmax(0,1fr);margin:18px 0;border:1px solid #3c5368;background:linear-gradient(120deg,#182c3e,#111e2b);border-radius:6px;overflow:hidden}.command-brief>.portrait{height:100%;min-height:205px;aspect-ratio:auto}.command-copy{padding:22px 26px}.command-copy h2{font-size:1.5rem;margin:4px 0 10px}.command-copy h2 span{font-size:14px;color:var(--ink-2);font-weight:400;margin-left:10px}.command-copy p{margin:7px 0 0;color:#cad8e3}.command-copy .quotation{border-left:2px solid var(--gold);padding-left:15px}.role-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:15px 0 0}.role-tab{font-size:14px;color:#b7c8d6;border:1px solid #40576b;background:#0d1b29;padding:7px 12px}.role-tab[aria-pressed=true]{border-color:var(--gold);color:var(--gold);background:#302e27}.brief-note{font-size:12px;color:#859db2;margin:9px 0 0}
+.mine{gap:16px}.mg{padding:20px 24px;background:#102630;border-color:#315457}.mg.secret{background:linear-gradient(120deg,#2a2229,#201e29);border-color:#79534f;border-style:solid}.mg .v{font-size:3rem;margin:5px 0}.mini-bar{background:#233a4c;height:6px}.note{background:#112b34;border-color:var(--peace);padding:15px 18px;font-size:14px}.err{background:#3a2426;border-color:var(--nuke);color:#ffc0b5;padding:15px 18px}.choices{grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;margin:20px 0}.choice{position:relative;overflow:hidden;min-height:210px;border:1px solid #395565;border-top:3px solid var(--peace);padding:25px 22px 20px;background:linear-gradient(145deg,#19343e,#10202d);color:var(--ink);transition:transform .2s,border-color .2s,box-shadow .2s}.choice.ne{border-left:1px solid #395565;border-top-color:var(--neu);background:linear-gradient(145deg,#263747,#12202d)}.choice.nu{border-left:1px solid #69504e;border-top-color:var(--nuke);background:linear-gradient(145deg,#392b30,#201d29)}.choice.pe{border-left:1px solid #395565}.choice:hover{transform:translateY(-5px);box-shadow:0 14px 30px #0004;border-color:var(--gold)}.choice .t{font-size:1.65rem;margin:10px 0}.choice .d{line-height:1.7}.policy-code{font:12px ui-monospace,monospace;letter-spacing:.12em;color:#97b8c8}.policy-effect{margin-top:18px;color:var(--gold);font-weight:600;font-size:14px}.policy-icon{float:right;font-size:24px;color:var(--peace)}.ne .policy-icon{color:var(--neu)}.nu .policy-icon{color:var(--nuke)}
+.state{margin:20px 0;border:1px solid #395166;border-top:3px solid var(--gold);background-image:linear-gradient(90deg,#0a1927ed,#0a1927df),var(--art-room);background-size:cover;background-position:center;padding:45px 20px}.state .k{font-size:2rem}.resolution{background:#292b28;border-color:#8b784f}.resolution h2{color:var(--gold)}.ballot button{background:#182736;color:var(--ink);border-color:#4d5c63}.ballot small{font-size:14px}.ballot button:hover{background:#263a4c}table.t{background:#101d2b;font-size:14px}table.t th{background:#1d3042;color:#bbcedc}table.t td{padding:10px}.slot{background:#122335;padding:12px}.slot.done{background:#193042}.code{color:var(--gold)}.qr,.qrbig{background:white;border-radius:3px;padding:4px}.setup{margin-top:25px}.wheelbox{filter:drop-shadow(0 15px 30px #0007)}.log{padding:12px 16px;background:#101e2b}.log div{padding:7px 0}.ballot button,.slot{min-width:0}
+.game-dialog{width:min(680px,calc(100% - 32px));max-height:90dvh;padding:0;border:1px solid #61707b;border-radius:10px;background:#112131;color:var(--ink);box-shadow:0 30px 100px #0009}.game-dialog::backdrop{background:#02080ddb;backdrop-filter:blur(6px)}.dialog-head{display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid var(--rule)}.dialog-head strong{font-size:14px;color:var(--gold)}.dialog-close{background:#203448;border:1px solid var(--rule);color:#fff;padding:6px 13px}.dialog-body{padding:24px}.dossier{display:grid;grid-template-columns:180px 1fr;gap:24px}.dossier .portrait{border:1px solid #536676}.dossier h2{font-size:1.6rem;margin:3px 0}.dossier p{color:#bbcedc}.dossier .rank{color:var(--gold)}.dialog-body ol{padding-left:23px}.dialog-body li{margin-bottom:14px}.dialog-body h3{font-size:17px;color:var(--gold)}.demo-banner{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:13px 18px;background:#322f25;border:1px solid #82704b;margin-bottom:18px;font-size:14px}.demo-banner select{width:auto;padding:7px 10px}.demo-banner button{padding:7px 12px;font-size:14px}.footer-note{text-align:center;color:#6f879c;font-size:12px;letter-spacing:.1em;margin-top:40px;padding-top:20px;border-top:1px solid #26394b}
+@media(min-width:1050px){.brief-stats{display:grid;grid-template-columns:1.4fr 1fr;gap:18px}.brief-stats .command-brief,.brief-stats .mine{margin:16px 0}.brief-stats .mine{gap:12px}.brief-stats .mg{padding:22px 18px}.brief-stats .command-copy{padding:20px}.brief-stats .command-brief{grid-template-columns:140px 1fr}.brief-stats .command-copy h2{font-size:1.25rem}}
+@media(max-width:960px){.wrap{padding:0 20px 50px}.lobby{grid-template-columns:1fr 340px;gap:16px}.lobby-scene{min-height:500px}.scene-content{padding:24px}.delegations{grid-template-columns:repeat(3,minmax(0,1fr))}.delegate .portrait{aspect-ratio:1.2 / 1}.objective-grid{grid-template-columns:1fr}.lane{grid-template-columns:180px 1fr 65px;gap:13px}.legend{font-size:12px}}
+@media(max-width:700px){.wrap{padding:0 14px 40px}.topbar{min-height:74px;margin-bottom:18px}.brand strong{font-size:12px;letter-spacing:.1em}.brand small{font-size:12px}.brand .seal{width:31px;height:31px}.top-actions span{display:none}.top-actions button{font-size:13px;padding:6px 9px}.lobby{grid-template-columns:1fr}.lobby-scene{min-height:360px}.scene-content h1{font-size:2.5rem}.entry-panel{padding:22px}.delegations{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.delegate-info{padding:9px}.delegate-info strong{font-size:14px}.delegate-info .rank,.delegate-info .country{font-size:12px}.section-title{align-items:flex-start}.section-title span{font-size:12px;max-width:130px;text-align:right}.banner{padding:18px}.banner .turn{font-size:1.35rem}.banner .turn span{font-size:14px}.banner .ttl .seal{display:none}.situation{min-height:190px;padding:22px}.situation h2{font-size:1.35rem}.floor{padding:12px}.lane{grid-template-columns:minmax(100px,130px) 1fr 55px;gap:9px}.plate{display:block;padding:7px}.plate .mini{display:none}.plate .cty{font-size:14px}.plate .tier{font-size:12px}.lane.colhead{font-size:12px}.lane.colhead span{display:none}.lane .val{font-size:1.35rem}.command-brief{grid-template-columns:110px 1fr}.command-copy{padding:16px}.command-copy h2{font-size:1.15rem}.command-copy h2 span{display:block;margin:3px 0}.command-copy p{font-size:14px}.role-tab{padding:6px 9px}.command-brief>.portrait{min-height:260px}.mine{grid-template-columns:1fr 1fr;gap:10px}.mg{padding:16px}.mg .v{font-size:2.4rem}.choices{grid-template-columns:1fr}.choice{min-height:155px;padding:20px}.choice .t{font-size:1.4rem;margin:5px 0}.policy-effect{margin-top:10px}.setup{grid-template-columns:1fr}.slot{grid-template-columns:48px 1fr 58px 40px;gap:5px;font-size:13px;padding:8px}.code{font-size:14px}.dossier{grid-template-columns:110px 1fr;gap:17px}.dossier h2{font-size:1.3rem}.dialog-body{padding:20px}.narrow{margin:24px auto;padding:22px}.ballot button{min-width:0;flex-basis:100%}.stats{flex-wrap:wrap}.objective-grid{margin-top:15px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@media print{body{background:white;color:black}.topbar,.footer-note,.top-actions,.demo-banner{display:none}}
+
+.command-brief>.portrait{height:auto;min-height:0;aspect-ratio:1;align-self:center}.delegate .portrait{aspect-ratio:1}
+</style>
+</head>
+<body>
+<div id="app" class="wrap"><p class="muted">불러오는 중…</p></div>
+<dialog id="game-dialog" class="game-dialog" aria-labelledby="dialog-title"></dialog>
+<noscript>이 게임을 이용하려면 브라우저에서 JavaScript를 켜 주세요.</noscript>
+<script type="module">
+let createClient=null,backendLoad=null,qrlib=null;
+async function ensureBackend(){
+ if(sb)return;
+ if(!backendLoad)backendLoad=import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm').then(m=>{createClient=m.createClient;sb=createClient(URL_,KEY,{global:{fetch:safeFetch},auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false,storage:memStore}});}).catch(()=>{backendLoad=null;throw new Error('수업 서버 연결에 필요한 파일을 불러오지 못했습니다. 인터넷 연결을 확인하고 다시 시도해 주세요.');});
+ await backendLoad;
+}
+import('https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/+esm').then(m=>{qrlib=m.default;}).catch(()=>{});
+const qrSVG=(t,c=3)=>{ if(!qrlib)return''; try{const q=qrlib(0,'M');q.addData(t);q.make();return q.createSvgTag(c,0);}catch(e){return'';} };
+
+/* ===== Supabase Publishable key ===== */
+const KEY_BAKED='sb_publishable_erhF21wt3qmOagP38OBaXQ_g_YQTPPO';
+const URL_='https://wsmwfhoeoravcmmvreqq.supabase.co';
+let KEY=KEY_BAKED;
+
+const NUKE_WIN=60, PEACE_WIN=80, EXPOSE_AT=40;
+const COUNTRIES=[{n:'아르곤국',t:'강대국',c:'#3F6E8C'},{n:'크림슨국',t:'강대국',c:'#A3503F'},
+ {n:'사파이어국',t:'중견국',c:'#3E8175'},{n:'앰버국',t:'중견국',c:'#B5872C'},
+ {n:'미스트국',t:'약소국',c:'#7C6E9B'},{n:'테라국',t:'약소국',c:'#6E7F46'}];
+const POOL5=['아르곤국','크림슨국','사파이어국','미스트국','테라국'];
+const COLOR=Object.fromEntries(COUNTRIES.map(c=>[c.n,c.c]));
+const CARDS=[
+ {k:'평화',cls:'pe',d:'군축에 동참한다 · 핵개발국이 많을수록 이득이 준다'},
+ {k:'중립',cls:'ne',d:'관망한다 · 평화 +4, 핵 +2 · 강대국의 지목을 피할 수 있다'},
+ {k:'핵개발',cls:'nu',d:'몰래 핵무장을 추진한다 · 핵 +6, 위장 외교로 평화도 +3'}];
+const PHASE_KO={setup:'개회 준비',negotiation:'비공식 협의',submit:'표결',result:'결과 발표',ended:'폐회'};
+const VICTORY={
+ '강대국':{p:'지목 카드 2장 — 한 나라를 지목한다. 결과는 그 나라가 그 턴에 무엇을 골랐느냐로 갈린다. 핵개발이면 상대 핵 −10 · 우리 평화 +10. 평화면 상대 평화 −5 · 우리 평화 −4(외교적 고립). 중립이면 헛방으로 우리 평화 −10.'},
+ '중견국':{p:'첩보 카드 2장 — 한 나라를 조사한다. 그 나라가 핵개발을 골랐다면 우리 평화 +5, 아니면 −5. 성패와 관계없이 그 나라의 핵 포인트를 알게 된다.'},
+ '약소국':{p:'첩보 카드 2장 (중견국과 같은 방식) · 호소 카드 1회 — 게임 중 한 번, 30초 동안 전체에게 연설할 수 있다 (다른 나라 발언 금지, 선생님께 선언).'}};
+
+const H=()=>Object.fromEntries(new URLSearchParams(location.hash.slice(1)));
+const setH=o=>{location.hash=new URLSearchParams({...H(),...o}).toString();};
+let h=H(); if(!KEY&&h.k)KEY=h.k;
+async function safeFetch(input,init){init=init||{};let url=input,o={...init};
+  if(typeof Request!=='undefined'&&input instanceof Request){url=input.url;o={method:input.method,headers:input.headers,body:init.body,...init};}
+  else if(input&&typeof input==='object'&&input.url)url=input.url;
+  const hd=o.headers;
+  if(hd&&typeof hd.forEach==='function'&&hd.constructor!==Object){const pl={};hd.forEach((v,k)=>{pl[k]=v;});o.headers=pl;}
+  delete o.signal; return fetch(String(url),o);}
+const memStore=(()=>{const m=new Map();return{getItem:k=>m.has(k)?m.get(k):null,
+  setItem:(k,v)=>{m.set(k,String(v));},removeItem:k=>{m.delete(k);}};})();
+const base=()=>location.origin+location.pathname;
+const link=c=>{const q=new URLSearchParams({s:c});if(!KEY_BAKED&&KEY)q.set('k',KEY);return base()+'#'+q.toString();};
+const SEAL=`<svg class="seal" width="42" height="42" viewBox="0 0 42 42" aria-hidden="true">
+  <circle cx="21" cy="21" r="19" fill="none" stroke="#A8873C" stroke-width="1.2"/>
+  <circle cx="21" cy="21" r="11" fill="none" stroke="#7E93A4" stroke-width=".9"/>
+  <path d="M2 21h38M21 2v38" stroke="#7E93A4" stroke-width=".7"/>
+  <ellipse cx="21" cy="21" rx="6" ry="11" fill="none" stroke="#7E93A4" stroke-width=".7"/>
+  ${[...Array(12)].map((_,i)=>{const a=i*30*Math.PI/180;
+    return `<line x1="${21+16*Math.cos(a)}" y1="${21+16*Math.sin(a)}"
+      x2="${21+19*Math.cos(a)}" y2="${21+19*Math.sin(a)}" stroke="#A8873C" stroke-width="1"/>`;}).join('')}
+</svg>`;
+const app=document.getElementById('app');
+const esc=s=>String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+let lastRenderKey='';
+const el=x=>{
+ const key=briefContext?`${H().s||H().demo||''}:${me?.country||''}:${briefContext.g.round_no}:${briefContext.g.phase}`:'';
+ const selections=Object.fromEntries(['sanc','spy'].map(id=>[id,document.getElementById(id)?.value||'']));
+ const specialOpen=document.getElementById('special-options')?.open;
+ app.innerHTML=gameShell(x);bindInterface();
+ if(key&&key===lastRenderKey){for(const [id,value] of Object.entries(selections)){const field=document.getElementById(id);if(field)field.value=value;}if(specialOpen&&document.getElementById('special-options'))document.getElementById('special-options').open=true;}
+ lastRenderKey=key;
+};
+const eb=m=>`<div class="err">${esc(m)}</div>`;
+const val=id=>{const e=document.getElementById(id);return e?e.value:'';};
+const on=(id,f)=>{const e=document.getElementById(id);if(e)e.onclick=f;};
+let sb=null;
+async function rpc(fn,args){let r;
+  try{await ensureBackend();r=await sb.rpc(fn,args);}
+  catch(e){const m=String(e&&e.message||e);
+    if(/postMessage|cloned|Failed to fetch|NetworkError/i.test(m))
+      throw new Error('서버에 연결하지 못했습니다. 미리보기 창에서는 막히니 실제 주소에 배포한 뒤 열어 주세요.');
+    throw e;}
+  if(r.error)throw new Error(String(r.error.message).replace(/^.*?:\s*/,''));
+  return r.data;}
+
+/* ══════════ 입구 ══════════ */
+function keyScreen(msg){el(`<div class="narrow"><h1>선생님 1회 설정</h1>
+  <p class="muted small">Supabase → Settings → API Keys → Publishable key를 붙여넣으세요.</p>${msg?eb(msg):''}
+  <div class="field"><input id="k" placeholder="sb_publishable_…"></div>
+  <button class="btn wide" id="go">저장하고 시작</button></div>`);
+  on('go',()=>{const v=val('k').trim();if(v.length<20)return keyScreen('키가 너무 짧습니다.');
+    setH({k:v});location.reload();});}
+
+function home(msg){el(lobbyHTML(msg));
+  on('demo',()=>{setH({demo:'1',t:'',s:'',n:''});});
+  document.getElementById('jc').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('join').click();});
+  on('join',async()=>{const c=val('jc').trim();
+    if(!/^\d{4}$/.test(c))return home('모둠 코드는 숫자 4자리입니다.');
+    try{await rpc('gg_join',{p_join_code:c});setH({s:c,t:'',n:''});route();}catch(e){home(e.message);}});
+  on('login',async()=>{const c=val('ac').trim();
+    try{const id=await rpc('gg_admin_login',{p_code:c});
+      if(!id)return home('교사 코드를 찾을 수 없습니다.');setH({t:c,s:'',n:''});route();}catch(e){home(e.message);}});
+  on('new',()=>{setH({n:'1',t:'',s:''});route();});}
+
+function newGame(msg){el(`<div class="narrow"><h1>새 게임 만들기</h1>${msg?eb(msg):''}
+  <div class="field"><label for="ti">수업 이름</label><input id="ti" placeholder="3학년 4반"></div>
+  <div class="field"><label for="cd">교사 코드 (4자 이상, 직접 정하세요)</label><input id="cd" placeholder="sahoe34"></div>
+  <div class="field"><label for="tc">모둠 수</label><select id="tc">
+    <option value="6">6모둠 — 강대국2 · 중견국2 · 약소국2</option>
+    <option value="5">5모둠 — 강대국2 · 중견국1 · 약소국2</option></select></div>
+  <button class="btn wide" id="mk">만들기</button>
+  <p class="small muted" style="margin-top:13px">교사 코드는 잊으면 게임을 이어갈 수 없으니 적어두세요.</p></div>`);
+  on('mk',async()=>{const code=val('cd').trim();
+    try{await rpc('gg_create_game',{p_title:val('ti').trim(),p_admin_code:code,p_team_count:+val('tc')});
+      setH({t:code,n:'',s:''});route();}catch(e){newGame(e.message);}});}
+
+/* ══════════ 교사 ══════════ */
+let tS=null,tT=null,spin=false,angle=0,sig='',lastR=null;
+async function teacher(code){clearInterval(tT);sig='';
+  const pull=async()=>{try{const st=await rpc('gg_admin_state',{p_code:code});
+      const s2=JSON.stringify(st); if(s2===sig||spin)return; sig=s2;tS=st;drawTeacher(code);}
+    catch(e){clearInterval(tT);el(eb(e.message)+`<button class="btn ghost" id="b">처음으로</button>`);
+      on('b',()=>{setH({t:''});route();});}};
+  await pull(); tT=setInterval(pull,1800);}
+async function refresh(code){tS=await rpc('gg_admin_state',{p_code:code});sig=JSON.stringify(tS);drawTeacher(code);}
+
+function drawTeacher(code){
+  const g=tS.game,teams=tS.teams,done=new Set(tS.submitted||[]);
+  if(teams.some(t=>!t.country))return drawSetup(code,teams);
+  const fin=g.status!=='playing';
+
+  const pips=Array.from({length:g.max_turns},(_,i)=>{const n=i+1;
+    const un=(n===5||n===10);
+    return `<div class="pip${un?' un':''}${n<g.round_no?' on':''}${n===g.round_no?' now':''}"
+      title="제${n}차 회의${un?' · 안보리 소집':''}"></div>`;}).join('');
+
+  const lanes=teams.map(t=>{
+    const pw=Math.min(100,t.peace_pts/PEACE_WIN*100);
+    const nk=t.exposed?`<div class="filln" style="width:${Math.min(100,t.nuke_shown/NUKE_WIN*100)}%"></div>`
+                      :`<div class="fog"></div>`;
+    return `<div class="lane${t.exposed?' hot':''}">
+      <div class="plate" style="--pc:${COLOR[t.country]||'#888'}">
+        ${portrait(leaderIndex(t.country),'mini')}<div><div class="cty">${esc(t.country)}</div>
+        <div class="tier">${esc(t.group_label)} · ${esc(t.tier)}</div></div></div>
+      <div class="gauges">
+        <div class="strip p"><div class="fillp" style="width:${pw}%"></div><div class="goal"></div></div>
+        <div class="strip n">${nk}<div class="goal"></div></div>
+      </div>
+      <div class="val">${t.peace_pts}
+        <i>${g.phase==='submit'?(done.has(t.id)?'제출 완료':'대기 중')
+           :(t.exposed?`핵 ${t.nuke_shown}`:'&nbsp;')}</i></div>
+    </div>`;}).join('');
+
+  const B=(id,l,ok=true,gh=false)=>`<button class="btn${gh?' ghost':''}" id="${id}"${ok?'':' disabled'}>${l}</button>`;
+  const UN_TURNS=[5,10];
+  const unNow=UN_TURNS.includes(g.round_no)&&g.phase==='result'&&!fin;
+
+  el(`<div class="banner">
+    <div class="ttl">${SEAL}<div>
+      <div class="turn">${g.round_no?`제${g.round_no}차 회의`:'개회 준비'}
+        <span>／ 전 ${g.max_turns}차 · ${PHASE_KO[g.phase]}</span></div>
+      <div class="sub">${esc(g.title||'')} · 의장 코드 ${esc(code)}</div></div></div>
+    ${g.round_no>1?`<div class="stats">
+      <div class="stat pe"><b>${Math.max(0,6-g.last_k)}</b><span>평화 이득</span></div>
+      <div class="stat nu"><b>${g.last_k}</b><span>핵개발 국가</span></div>
+      <div class="memo">지난 회의 기준<br>어느 나라인지는 비공개</div></div>`:''}
+  </div>
+  <div class="pips">${pips}</div>
+  ${situation(g)}
+
+  ${fin?`<div class="panel" style="text-align:center;margin-bottom:16px;border-left:4px solid var(--nuke)">
+    <div class="disp" style="font-size:1.8rem">${esc(g.outcome||'')}</div></div>`:''}
+
+  <div class="floor">
+    <div class="lane colhead"><div>대표부</div>
+      <div>평화 포인트 · 목표 ${PEACE_WIN}<span style="opacity:.65">　／　아랫줄은 핵 포인트 · 목표 ${NUKE_WIN}</span></div>
+      <div style="text-align:right">평화</div></div>
+    ${lanes}
+  </div>
+  <div class="legend">
+    <span><b style="background:var(--peace)"></b>평화 포인트 · 목표 ${PEACE_WIN}</span>
+    <span><b style="background:var(--nuke)"></b>핵 포인트 · 목표 ${NUKE_WIN}</span>
+    <span><b style="background:#C6D0D4"></b>비공개 · ${EXPOSE_AT}점을 넘으면 핵실험이 탐지되어 공개</span>
+  </div>
+
+  <hr class="rule">
+  <div class="row">
+    ${B('bNeg','비공식 협의 시작',!fin&&g.phase!=='submit',true)}
+    ${B('bSub','표결 개시',!fin&&g.round_no>0&&g.phase!=='submit')}
+    ${B('bEnd','표결 종료 · 집계',!fin&&g.phase==='submit')}
+    ${B('bNext','다음 회의',!fin&&(g.phase==='result'||g.round_no===0),true)}
+  </div>
+
+  ${unNow?`<div class="resolution">
+    <h2>안전보장이사회 소집 · 결의안 제${UN_TURNS.indexOf(g.round_no)+1}호</h2>
+    <p class="small muted" style="margin:.2rem 0 .2rem">각 대표부의 표결로 한 항만 채택합니다.
+      채택된 항의 포인트가 <b>모든 나라에서 25%</b> 삭감됩니다.</p>
+    <div class="ballot">
+      <button class="bn" id="unN">제1항 · 핵 포인트 25% 삭감
+        <small>핵 개발을 억제한다. 평화 노선 국가에 유리하다.</small></button>
+      <button class="bp" id="unP">제2항 · 평화 포인트 25% 삭감
+        <small>기존 질서를 되돌린다. 뒤처진 국가에 유리하다.</small></button>
+    </div></div>`:''}
+
+  <div id="rbox">${resultHTML(g)}</div>
+
+  <hr class="rule">
+  <h2>대표부별 카드 잔량</h2>
+  <table class="t"><tr><th>국가</th><th>등급</th><th>지목</th><th>첩보</th></tr>
+    ${teams.map(t=>`<tr><td>${esc(t.country)}</td><td>${esc(t.tier)}</td>
+      <td>${t.tier==='강대국'?t.sanctions_left+'장':'–'}</td>
+      <td>${t.tier!=='강대국'?t.spy_left+'장':'–'}</td></tr>`).join('')}</table>
+
+  <hr class="rule">
+  <details><summary class="small muted" style="cursor:pointer">대표부 접속 QR · 신임장 인쇄</summary>
+    <div class="row" style="margin-top:11px;align-items:flex-start">${teams.map(t=>
+      `<div style="text-align:center"><div class="qrbig">${qrSVG(link(t.join_code),3)}</div>
+       <div class="small"><b>${esc(t.group_label)}</b> ${esc(t.join_code)}</div></div>`).join('')}</div>
+    <div class="row" style="margin-top:11px"><button class="btn ghost" id="bPrint">신임장 인쇄</button></div>
+  </details>
+  ${fin?`<div class="row" style="margin-top:14px">
+    <button class="btn ghost" id="bRev">모든 핵 포인트 공개 (성찰용)</button></div><div id="rev"></div>`:''}`);
+
+  const call=async(fn,a)=>{try{await rpc(fn,a);await refresh(code);}catch(e){alert(e.message);}};
+  on('bNeg',()=>call('gg_set_phase',{p_code:code,p_phase:'negotiation'}));
+  on('bSub',()=>call('gg_set_phase',{p_code:code,p_phase:'submit'}));
+  on('bNext',()=>call('gg_next_round',{p_code:code}));
+  on('bEnd',async()=>{try{lastR=await rpc('gg_end_round',{p_code:code});await refresh(code);}catch(e){alert(e.message);}});
+  on('unN',()=>{if(confirm('모든 나라의 핵 포인트를 25% 삭감합니다.'))call('gg_un_action',{p_code:code,p_kind:'핵'});});
+  on('unP',()=>{if(confirm('모든 나라의 평화 포인트를 25% 삭감합니다.'))call('gg_un_action',{p_code:code,p_kind:'평화'});});
+  on('bPrint',()=>printCards(teams));
+  on('bRev',async()=>{const d=await rpc('gg_reveal',{p_code:code});
+    document.getElementById('rev').innerHTML=`<table class="t" style="margin-top:11px">
+      <tr><th>국가</th><th>등급</th><th>핵</th><th>평화</th></tr>${d.map(x=>
+      `<tr><td>${esc(x.country)}</td><td>${esc(x.tier)}</td><td>${x.nuke}</td><td>${x.peace}</td></tr>`).join('')}</table>`;});
+}
+
+function resultHTML(g){const r=lastR;
+  if(!r||g.phase!=='result'||r.round!==g.round_no)return'';
+  const ne=r.newly_exposed||[], sc=r.sanctions||[];
+  return `<hr class="rule"><h2>제${r.round}차 회의 결과</h2>
+   <div class="note">이번 회의에서 <b>핵개발 ${r.nuclear_count}곳</b> → 평화국은 각자 <b>+${r.peace_gain}</b>.
+     어느 나라가 핵개발을 골랐는지는 공개되지 않습니다.</div>
+   ${ne.length?`<div class="err"><b>핵실험 탐지</b> — ${ne.map(esc).join(', ')}.
+     핵개발이 드러났고, <b>다른 모든 나라의 평화 포인트가 ${r.shock} 깎였습니다.</b></div>`:''}
+   ${sc.length?`<table class="t" style="margin:10px 0"><tr><th>지목한 나라</th><th>대상</th><th>결과</th></tr>
+     ${sc.map(x=>`<tr><td>${esc(x.actor)}</td><td>${esc(x.target)}</td>
+       <td class="${x.result==='제재 적중'?'hit':'miss'}">${
+         x.result==='제재 적중'?'제재 적중 · 우리 +10 · 상대 핵 −10'
+         :x.result==='봉쇄'?'외교적 고립 · 상대 −5 · 우리 −4'
+         :'헛방(중립으로 회피) · 우리 −10'}</td></tr>`).join('')}</table>`:''}
+   ${r.outcome?`<div class="panel" style="text-align:center;border-left:4px solid var(--nuke)">
+     <div class="disp" style="font-size:1.5rem">${esc(r.outcome)}</div></div>`:''}`;}
+
+function printCards(teams){
+  const cards=teams.filter(t=>t.country).map(t=>{const v=VICTORY[t.tier]||{p:''};
+    return `<div class="pc"><div class="bar" style="background:${COLOR[t.country]}"></div>
+    <div class="hd"><div><div class="cty">${esc(t.country)}</div>
+      <div class="mt">${esc(t.group_label)} · ${esc(t.tier)}</div></div>
+      <div class="qr">${qrSVG(link(t.join_code),3)}</div></div>
+    <div class="jc">입장 코드 <b>${esc(t.join_code)}</b></div>
+    <div class="s"><b>우리의 특권</b><br>${v.p}</div>
+    <div class="s"><b>승리 조건</b><br>평화 포인트 80 → 영세중립국으로 승리.
+      (평화 이득 = 6 − 그 회의의 핵개발국 수. 모든 나라는 5점에서 시작.)<br>
+      핵 포인트 60 → 우리만 완성했을 때 승리. 두 나라가 같은 회의에서 완성하면 핵전쟁으로 전원 패배.<br>
+      둘이 같은 턴에 달성되면 평화가 이긴다.</div>
+    <div class="w">다른 나라에 보여주지 마세요.</div></div>`;}).join('');
+  const w=window.open('','_blank'); if(!w)return alert('팝업이 차단되었습니다.');
+  w.document.write(`<!doctype html><meta charset="utf-8"><title>대표부 신임장</title><style>
+   @page{margin:11mm}body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;color:#0F2027;margin:0}
+   .g{display:grid;grid-template-columns:1fr 1fr;gap:8mm}
+   .pc{border:1px solid #A6B4B9;break-inside:avoid;overflow:hidden;padding-bottom:9px}
+   .bar{height:9px}.hd{display:flex;justify-content:space-between;padding:9px 11px 0;gap:9px}
+   .cty{font-size:18px;font-weight:700}.mt{font-size:10.5px;color:#4C6069}
+   .qr svg{width:72px;height:72px;display:block}
+   .jc{padding:5px 11px;font-size:12px}.jc b{font-size:19px;letter-spacing:.13em}
+   .s{padding:5px 11px;font-size:10.5px;line-height:1.5}.s b{font-size:10px;color:#4C6069}
+   .w{padding:4px 11px 0;font-size:9.5px;color:#B5432F}
+  </style><div class="g">${cards}</div>`);
+  w.document.close();setTimeout(()=>w.print(),400);}
+
+/* ── 국가 배정 룰렛 ── */
+function drawSetup(code,teams){
+  const taken=new Set(teams.filter(t=>t.country).map(t=>t.country));
+  const pool=(teams.length===5?COUNTRIES.filter(c=>POOL5.includes(c.n)):COUNTRIES).filter(c=>!taken.has(c.n));
+  const nx=teams.find(t=>!t.country);
+  const R=138,C=148,n=pool.length;
+  const sec=pool.map((c,i)=>{const a0=(i/n)*2*Math.PI-Math.PI/2,a1=((i+1)/n)*2*Math.PI-Math.PI/2,m=(a0+a1)/2;
+    const P=(a,r)=>[C+r*Math.cos(a),C+r*Math.sin(a)];
+    const[x0,y0]=P(a0,R),[x1,y1]=P(a1,R),[tx,ty]=P(m,R*.62);
+    return `<path d="M${C},${C} L${x0},${y0} A${R},${R} 0 ${(a1-a0)>Math.PI?1:0},1 ${x1},${y1} Z"
+     fill="${c.c}" stroke="#E4E9EB" stroke-width="2"/><text x="${tx}" y="${ty}" fill="#fff" font-size="13"
+     font-weight="600" text-anchor="middle" dominant-baseline="middle"
+     transform="rotate(${m*180/Math.PI+90},${tx},${ty})">${c.n.replace('국','')}</text>`;}).join('');
+  el(`<div class="banner"><div class="ttl">${SEAL}<div>
+    <div class="turn">대표부 배정</div>
+    <div class="sub">${teams.length}개 모둠 · 룰렛으로 뽑습니다</div></div></div></div>
+  <div class="setup"><div>
+    <div class="wheelbox"><div class="needle"></div>
+      <svg id="wh" viewBox="0 0 296 296" style="transform:rotate(${angle}deg)">${sec}
+      <circle cx="148" cy="148" r="16" fill="#E4E9EB" stroke="#0F2027" stroke-width="2"/></svg></div>
+    <button class="btn wide" id="spin" style="margin-top:13px"${spin?' disabled':''}>${esc(nx.group_label)} 뽑기</button>
+    <p class="small muted" style="text-align:center;margin-top:8px">국력은 뽑기로 정해집니다.
+      아무도 자기 국력을 고르지 않았다는 사실이 성찰의 재료가 됩니다.</p></div>
+  <div>${teams.map(t=>`<div class="slot ${t.country?'done':''}"><b>${esc(t.group_label)}</b>
+    <span>${t.country?`<span class="sw" style="background:${COLOR[t.country]}"></span><b>${esc(t.country)}</b>
+      <span class="small muted">${esc(t.tier)}</span>`:'<span class="muted small">대기</span>'}</span>
+    <span class="code">${esc(t.join_code)}</span><span class="qr">${qrSVG(link(t.join_code),2)}</span></div>`).join('')}
+    <div class="row" style="margin-top:10px"><button class="btn ghost" id="bPrint">신임장 인쇄</button></div>
+    <div class="panel" style="margin-top:14px"><h2>등급별 특권</h2>
+      <table class="t"><tr><th>등급</th><th>특권</th></tr>
+      <tr><td>강대국</td><td>지목 카드 2장 (상대 선택에 따라 우리 평화 +10 / −4 / −10)</td></tr>
+      <tr><td>중견국</td><td>첩보 카드 2장</td></tr>
+      <tr><td>약소국</td><td>첩보 카드 2장 · 호소 카드 1회</td></tr></table></div>
+      <p class="small muted" style="margin:.5rem 0 0">모든 나라는 평화 5점을 갖고 시작합니다.</p>
+  </div></div>`);
+  on('bPrint',()=>printCards(teams));
+  on('spin',()=>{if(spin)return;spin=true;document.getElementById('spin').disabled=true;
+    const i=Math.floor(Math.random()*pool.length),seg=360/pool.length;
+    const tgt=360*6+(360-(i*seg+seg/2)); angle=tgt;
+    document.getElementById('wh').style.transform=`rotate(${tgt}deg)`;
+    setTimeout(async()=>{const c=pool[i];
+      try{await rpc('gg_assign_country',{p_code:code,p_slot:nx.slot,p_country:c.n,p_tier:c.t});}
+      catch(e){alert(e.message);}
+      angle=tgt%360;spin=false;await refresh(code);},4400);});}
+
+/* ══════════ 학생 ══════════ */
+let sT=null,me=null,sSig='';
+async function student(join){clearInterval(sT);sSig='';
+  try{me=await rpc('gg_join',{p_join_code:join});}catch(e){setH({s:''});return home(e.message);}
+  const pull=async()=>{try{
+    const[{data:g},st]=await Promise.all([
+      sb.from('gg_games').select('round_no,max_turns,phase,status,outcome,last_k,last_p').eq('id',me.game_id).single().then(r=>{if(r.error)throw r.error;if(!r.data)throw new Error('회의 정보를 찾을 수 없습니다.');return r;}),
+      rpc('gg_status',{p_join_code:join})]);
+    document.getElementById('connection-warning')?.remove();const s2=JSON.stringify([g,st]); if(s2===sSig)return; sSig=s2; drawStudent(join,g,st);document.getElementById('connection-warning')?.remove();}catch(e){if(!document.getElementById('connection-warning')){const notice=document.createElement('div');notice.id='connection-warning';notice.className='err';notice.setAttribute('role','status');notice.textContent='회의 정보를 갱신하지 못했습니다. 연결을 다시 확인하는 중입니다.';app.prepend(notice);}}};
+  await pull(); sT=setInterval(pull,2000);}
+
+function drawStudent(join,g,st){
+  const col=COLOR[me.country]||'#888';
+  const head=`<div class="flag" style="background:${col}"></div>
+   <div class="banner">
+     <div><div class="turn">${esc(me.country||'')} 대표부</div>
+       <div class="sub">${esc(me.group_label)} · ${esc(me.tier||'')}</div></div>
+     <div style="text-align:right"><div class="turn" style="font-size:1.15rem">제${g.round_no}차
+       <span>／ 전 ${g.max_turns}차</span></div>
+       <div class="sub">${PHASE_KO[g.phase]}</div></div></div>
+   <div class="brief-stats">${commandBrief(g,st)}<div class="mine">
+     <div class="mg pub"><div class="lbl">평화 포인트 · 모두에게 공개</div>
+       <div class="v">${st.peace_pts}</div><div class="of">목표 ${PEACE_WIN} · 영세중립국 승리</div>
+       <div class="mini-bar"><i style="width:${Math.min(100,st.peace_pts/PEACE_WIN*100)}%;background:var(--peace)"></i></div></div>
+     <div class="mg secret"><div class="lbl">핵 포인트 · 우리만 봅니다</div>
+       <div class="v">${st.nuke_pts}</div><div class="of">목표 ${NUKE_WIN} · ${EXPOSE_AT} 넘으면 들킴</div>
+       <div class="mini-bar"><i style="width:${Math.min(100,st.nuke_pts/NUKE_WIN*100)}%;background:var(--nuke)"></i></div></div>
+   </div>
+   </div>
+   ${g.round_no>1?`<div class="note">지난 회의에서 <b>핵개발 ${g.last_k}곳</b> → 평화 이득 <b>+${Math.max(0,6-g.last_k)}</b>.
+     누가 골랐는지는 비공개입니다.</div>`:''}
+   ${(st.exposed||[]).length?`<div class="err"><b>핵실험이 탐지된 나라</b> — ${st.exposed.map(esc).join(', ')}</div>`:''}
+   ${(st.spy_results||[]).length?`<h2 style="margin-top:16px">첩보 보고</h2><div class="log">
+     ${st.spy_results.map(x=>`<div>제${x.round}차 · ${esc(x.country)} — 그때 선택 <b>${esc(x.card||'?')}</b>,
+       핵 포인트 <b>${x.pts}</b> <span class="${x.delta>0?'hit':'miss'}">${x.delta>0?'+':''}${x.delta}</span></div>`).join('')}</div>`:''}
+   ${(st.sanction_results||[]).length?`<h2 style="margin-top:16px">제재 기록</h2><div class="log">
+     ${st.sanction_results.map(x=>`<div>제${x.round}차 · ${esc(x.country)} 지목 —
+       <span class="${x.result==='제재 적중'?'hit':'miss'}">${
+         x.result==='제재 적중'?'제재 적중 +10':x.result==='봉쇄'?'외교적 고립 −4':'헛방 −10'}</span></div>`).join('')}</div>`:''}`;
+
+  if(g.status!=='playing')
+    return el(head+`<div class="state"><div class="k">게임 종료</div><p class="muted">${esc(g.outcome||'')}</p></div>`);
+
+  if(g.phase==='submit'&&!st.my_card){
+    const rs=st.roster||[];
+    const sanc=(me.tier==='강대국'&&st.sanctions_left>0)?`<div class="panel" style="margin:12px 0;border-left:4px solid var(--nuke)">
+      <h2 style="margin-bottom:.2rem">지목 카드 · ${st.sanctions_left}장 남음</h2>
+      <p class="small muted" style="margin:.2rem 0 .5rem">한 나라를 지목합니다.
+        결과는 그 나라가 <b>이번 회의에서 무엇을 냈느냐</b>로 갈립니다.</p>
+      <table class="t" style="margin-bottom:.6rem"><tr><th>상대가 고른 카드</th><th>결과</th></tr>
+        <tr><td>핵개발</td><td class="hit">상대 핵 −10 · 우리 평화 +10</td></tr>
+        <tr><td>평화</td><td>상대 평화 −5 · 우리 평화 −4</td></tr>
+        <tr><td>중립</td><td class="miss">헛방 · 우리 평화 −10</td></tr></table>
+      <p class="small muted" style="margin:0 0 .6rem">상대는 지목당한 사실을 모릅니다.
+        앞서가는 나라를 누르는 데 쓸 수도 있지만, 그 카드로 핵을 잡았다면 +10이었습니다.</p>
+      <label for="sanc">지목할 나라</label><select id="sanc"><option value="">쓰지 않음</option>
+        ${rs.map(t=>`<option value="${t.id}">${esc(t.country)} 지목</option>`).join('')}</select></div>`:'';
+    const spy=(me.tier!=='강대국'&&st.spy_left>0)?`<div class="panel" style="margin:12px 0;border-left:4px solid var(--peace)">
+      <h2 style="margin-bottom:.2rem">첩보 카드 · ${st.spy_left}장 남음</h2>
+      <p class="small muted" style="margin:.2rem 0 .6rem">조사한 나라가 이번 회의에서 핵개발을 골랐다면
+        <b>우리 평화 +5</b>, 아니면 <b>−5</b>. 성패와 관계없이 그 나라의 핵 포인트를 알게 됩니다.
+        그 정보를 강대국에 넘길지는 우리가 정합니다.</p>
+      <label for="spy">조사할 나라</label><select id="spy"><option value="">쓰지 않음</option>
+        ${rs.map(t=>`<option value="${t.id}">${esc(t.country)} 조사</option>`).join('')}</select></div>`:'';
+    el(head+`<hr class="rule"><p class="small muted">모둠에서 합의한 카드를 누르세요. 지목·첩보를 함께 쓰려면 아래 ‘특수 작전’에서 대상을 먼저 고르세요. 제출 후에는 바꿀 수 없습니다.</p>
+      <div class="choices">${CARDS.map(c=>`<button class="choice ${c.cls}" data-k="${c.k}">
+        ${policyDecoration(c)}</button>`).join('')}</div>
+      ${(sanc||spy)?`<details id="special-options" class="panel"><summary>특수 작전 · ${sanc?'지목':'첩보'} 카드 사용하기</summary>${sanc}${spy}</details>`:''}
+      <details style="margin-top:14px"><summary class="small muted" style="cursor:pointer">점수표</summary>
+        <div style="margin-top:9px"><table class="t">
+    <tr><th>카드</th><th>평화 포인트</th><th>핵 포인트</th></tr>
+    <tr><td>평화</td><td><b>+6 − (그 회의의 핵개발국 수)</b></td><td>–</td></tr>
+    <tr><td>중립</td><td>+4</td><td>+2</td></tr>
+    <tr><td>핵개발</td><td>+3</td><td>+6</td></tr></table>
+    <p class="small muted">모든 나라는 평화 5점을 갖고 시작합니다. 핵개발국이 한 곳 늘 때마다 평화 이득이 1씩 줄어듭니다.<br>
+      어떤 나라의 핵 포인트가 ${EXPOSE_AT}을 넘으면 핵실험이 탐지되어 <b>다른 모든 나라의 평화 포인트가 8 깎입니다</b>
+      (같은 회의에서 두 곳이면 16).<br>
+      핵 ${NUKE_WIN}을 먼저 채우면 이기지만, 두 나라가 같은 회의에서 완성하면 핵전쟁으로 모두 패배합니다.
+      핵과 평화가 같은 회의에서 달성되면 평화가 이깁니다.</p></div></details>
+      <p class="small muted" style="margin-top:11px">제출 ${st.submitted} / ${st.total}</p>`);
+    app.querySelectorAll('.choice').forEach(b=>{b.onclick=async()=>{
+      const k=b.dataset.k; if(join==='DEMO'){showPolicyDemo(k);return;}
+      const a=document.getElementById('sanc'),s=document.getElementById('spy');
+      const tg=a&&a.value?a.value:null, sp=s&&s.value?s.value:null;
+      let m=`'${k}' 카드를 냅니다.`;
+      if(tg)m+=`\n제재 지목: ${a.options[a.selectedIndex].text.replace(' 지목','')}`;
+      if(sp)m+=`\n첩보 조사: ${s.options[s.selectedIndex].text.replace(' 조사','')}`;
+      if(!confirm(m+'\n번복할 수 없습니다.'))return;
+      app.querySelectorAll('.choice').forEach(x=>x.disabled=true);
+      try{await rpc('gg_submit',{p_join_code:join,p_card:k,p_target:tg,p_spy:sp});}catch(e){alert(e.message);}
+      sSig='';student(join);};});
+    return;}
+
+  let body;
+  if(g.phase==='submit')body=`<div class="state"><div class="k">${esc(st.my_card)} 표결 완료</div>
+    <p class="muted">기다리는 중 · ${st.submitted} / ${st.total}</p></div>`;
+  else if(g.phase==='negotiation')body=`<div class="state"><div class="k">비공식 협의</div>
+    <p class="muted">대표는 다른 대표부를 찾아가 협의하고 오세요.<br>합의는 구속력이 없습니다.</p></div>`;
+  else if(g.phase==='result')body=`<div class="state"><div class="k">집계 중</div>
+    <p class="muted">의장석 화면을 보세요.</p></div>`;
+  else body=`<div class="state"><div class="k">대기</div>
+    <p class="muted">의장이 회의를 개회하면 카드가 나타납니다.</p></div>`;
+
+  el(head+body+`<hr class="rule"><table class="t">
+    <tr><th>카드</th><th>평화 포인트</th><th>핵 포인트</th></tr>
+    <tr><td>평화</td><td><b>+6 − (그 회의의 핵개발국 수)</b></td><td>–</td></tr>
+    <tr><td>중립</td><td>+4</td><td>+2</td></tr>
+    <tr><td>핵개발</td><td>+3</td><td>+6</td></tr></table>
+    <p class="small muted">모든 나라는 평화 5점을 갖고 시작합니다. 핵개발국이 한 곳 늘 때마다 평화 이득이 1씩 줄어듭니다.<br>
+      어떤 나라의 핵 포인트가 ${EXPOSE_AT}을 넘으면 핵실험이 탐지되어 <b>다른 모든 나라의 평화 포인트가 8 깎입니다</b>
+      (같은 회의에서 두 곳이면 16).<br>
+      핵 ${NUKE_WIN}을 먼저 채우면 이기지만, 두 나라가 같은 회의에서 완성하면 핵전쟁으로 모두 패배합니다.
+      핵과 평화가 같은 회의에서 달성되면 평화가 이깁니다.</p>`);}
+
+// Fictional representative dossiers. These roles are narrative aids, not score modifiers.
+const LEADERS=[
+ {name:'에이드리언 콜',title:'대통령',style:'질서와 억지',quote:'평화를 지킬 힘이 필요합니다. 하지만 그 힘을 누가 견제할까요?',bio:'강대국의 영향력을 바탕으로 국제 질서를 주도하려는 대통령. 군축을 요구하면서도 자국의 안보를 놓치고 싶지 않습니다.'},
+ {name:'린 웨이',title:'수상',style:'국익과 균형',quote:'다른 나라의 약속만으로 우리 국민의 안전을 지킬 수 있을까요?',bio:'외부의 압박에 쉽게 물러서지 않는 수상. 상대의 의도를 살피며 협력과 견제 사이에서 국익을 계산합니다.'},
+ {name:'아룬 메흐라',title:'총리',style:'중재와 연대',quote:'혼자 결정할 수 없는 일이라면, 함께 결정할 동료를 찾읍시다.',bio:'강대국 사이에서 중견국의 목소리를 모으는 총리. 정보와 외교를 활용해 협상의 여지를 넓히려 합니다.'},
+ {name:'엘레나 베르크',title:'수상',style:'실리와 신뢰',quote:'오늘의 작은 이익이 내일의 신뢰보다 클까요?',bio:'안정적인 협력 관계를 중시하는 수상. 눈앞의 점수와 장기적인 신뢰 중 무엇을 택할지 고민합니다.'},
+ {name:'라일라 누르',title:'외교장관',style:'설득과 생존',quote:'우리에게도 안전하게 살아갈 권리가 있습니다. 누가 그 약속을 지켜 줄까요?',bio:'약소국 대표단을 이끄는 외교장관. 첩보와 국제사회를 향한 호소를 통해 자국의 생존 공간을 찾습니다.'},
+ {name:'마테오 리오스',title:'총리',style:'자주와 협력',quote:'강한 나라만 안전한 평화라면, 그것을 평화라고 부를 수 있을까요?',bio:'국력의 격차 속에서 자주적인 선택을 지키려는 총리. 다른 나라와의 연대가 실제 안전으로 이어지는지 묻습니다.'}
+];
+const ROLES={leader:'국가대표',foreign:'외교장관',defense:'국방장관',intel:'정보장관'};
+let currentRole='leader',briefContext=null,dialogReturnFocus=null,demoNation=0;
+const leaderIndex=country=>Math.max(0,COUNTRIES.findIndex(c=>c.n===country));
+const portrait=(i,cls='')=>`<span class="portrait ${cls}" style="--px:${i%3*50}%;--py:${Math.floor(i/3)*100}%" role="img" aria-label="${LEADERS[i].name} ${LEADERS[i].title} 일러스트"></span>`;
+function gameShell(content){return `<header class="topbar"><a class="brand" href="#" aria-label="핵확산 시뮬레이션 처음으로">${SEAL}<span><strong>THE LAST ACCORD</strong><small>핵확산 시뮬레이션 · 사회②</small></span></a><div class="top-actions"><span>국제사회의 갈등과 협력</span><button type="button" data-help>작전 지침</button></div></header>${content}<footer class="footer-note">THE LAST ACCORD · 가상 국가로 경험하는 국제사회</footer>`;}
+function bindInterface(){
+ app.querySelector('[data-help]')?.addEventListener('click',showGuide);
+ app.querySelectorAll('[data-leader]').forEach(b=>b.onclick=()=>showDossier(+b.dataset.leader));
+ app.querySelectorAll('[data-role]').forEach(b=>b.onclick=()=>{
+   currentRole=b.dataset.role;
+   app.querySelectorAll('[data-role]').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.role===currentRole)));
+   const quote=app.querySelector('#advisor-quote');if(quote&&briefContext)quote.textContent=advice(currentRole,briefContext.g,briefContext.st);
+ });
+}
+function openGameDialog(title,body){
+ const d=document.getElementById('game-dialog');dialogReturnFocus=document.activeElement;
+ d.innerHTML=`<div class="dialog-head"><strong id="dialog-title">${esc(title)}</strong><button type="button" class="dialog-close" aria-label="대화상자 닫기">닫기</button></div><div class="dialog-body">${body}</div>`;
+ d.querySelector('.dialog-close').onclick=()=>d.close();
+ if(!d.open)d.showModal();
+ d.onclose=()=>{if(dialogReturnFocus?.isConnected)dialogReturnFocus.focus();};
+}
+function showDossier(i){const l=LEADERS[i],c=COUNTRIES[i];openGameDialog('대표 인물 · 기밀 인물철',`<div class="dossier">${portrait(i)}<div><div class="eyebrow">${c.n} / ${c.t}</div><h2>${l.name}</h2><div class="rank">${l.title} · ${l.style}</div><p>${l.bio}</p></div></div><p class="note">“${l.quote}”</p><h3>대표부의 특권</h3><p>${VICTORY[c.t].p}</p><p class="small muted">인물과 국가는 모두 가상입니다. 성격과 직책은 역할극을 위한 설정이며 점수나 능력치를 바꾸지 않습니다.</p>`);}
+function showGuide(){openGameDialog('작전 지침 · 수업 플레이 가이드',`<h2>우리의 안전과 모두의 평화</h2><ol><li><b>대표부를 구성하세요.</b> 선생님이 국가를 배정합니다. 모둠 안에서 국가대표·외교장관·국방장관·정보장관 역할을 나눠 보세요.</li><li><b>협상하세요.</b> 다른 대표부와 약속을 맺을 수 있지만, 합의는 구속력이 없습니다.</li><li><b>한 장을 선택하세요.</b> 평화·중립·핵개발 중 모둠이 합의한 카드를 제출합니다. 지목·첩보 카드는 제출 전에 정하세요.</li><li><b>결과를 살피세요.</b> 핵 포인트는 원칙적으로 비공개이며 40점을 <b>넘으면</b> 핵실험이 탐지됩니다. 다른 모든 나라의 평화가 8점씩 줄어듭니다.</li></ol><table class="t"><tr><th>선택</th><th>평화</th><th>핵</th></tr><tr><td>평화</td><td>+6 − 이번 핵개발국 수</td><td>변화 없음</td></tr><tr><td>중립</td><td>+4</td><td>+2</td></tr><tr><td>핵개발</td><td>+3</td><td>+6</td></tr></table><h3>승리와 공동 패배</h3><p>평화 80점 또는 핵 60점이 목표입니다. 같은 회의에 두 나라 이상이 핵을 완성하면 핵전쟁으로 모두 패배합니다. 핵과 평화 승리가 겹치면 평화 승리가 우선합니다.</p><p class="small muted">모든 나라는 평화 5점으로 시작합니다. 제5·10차 결과 발표 때 안전보장이사회 결의로 모든 나라의 핵 또는 평화 포인트를 25% 삭감합니다. 실제 국제기구의 절차와 다른 수업용 규칙입니다.</p><h3>플레이 후 생각할 질문</h3><p>각 나라가 안전을 위해 한 선택이 왜 모두를 더 불안하게 만들었을까요? 국력이 달라지면 선택의 폭도 달라졌나요?</p>`);}
+function delegationGrid(){return `<div class="section-title"><h2>세계의 협상 상대들</h2><span>대표 인물을 눌러 전략과 특권 확인</span></div><div class="delegations">${COUNTRIES.map((c,i)=>`<button type="button" class="delegate" data-leader="${i}" style="--nation:${c.c}">${portrait(i)}<div class="delegate-info"><div class="country">${c.n} · ${c.t}</div><strong>${LEADERS[i].name}</strong><span class="rank">${LEADERS[i].title} / ${LEADERS[i].style}</span></div></button>`).join('')}</div><p class="roster-foot">가상 국가·인물 설정입니다. 국가별 특권은 기존 게임 규칙을 따릅니다.</p>`;}
+function lobbyHTML(msg){return `<div class="lobby"><section class="lobby-scene"><span class="scene-badge">시나리오 01 / 핵확산 위기</span><div class="scene-content"><div class="eyebrow">THE LAST ACCORD</div><h1>마지막 합의,<br><em>당신의 선택.</em></h1><p>협상을 믿을 것인가, 힘을 택할 것인가.<br>당신은 지금 한 나라의 대표입니다.</p><div class="scenario-meta"><span><b>5–6</b>개 대표부</span><span><b>15</b>차 회의</span><span><b>3</b>가지 선택</span></div></div></section><section class="entry-panel"><div class="eyebrow">DELEGATION ACCESS</div><h2>대표부 입장</h2><p class="small muted">선생님이 안내한 모둠 코드를 입력하세요.</p>${msg?eb(msg):''}<div class="field"><label for="jc">모둠 입장 코드 · 숫자 4자리</label><input id="jc" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="0000"></div><button class="btn wide" id="join">전략실 입장 →</button><hr class="rule"><h2 style="font-size:1.05rem">의장석 · 교사용</h2><div class="field"><label for="ac">교사 코드</label><input id="ac" type="password" autocomplete="off" placeholder="설정한 교사 코드"></div><div class="row"><button class="btn ghost" id="login">이어서 진행</button><button class="btn ghost" id="new">새 게임 만들기</button></div><button class="demo-link" id="demo">코드 없이 전략실 둘러보기</button></section></div>${delegationGrid()}<div class="objective-grid"><div class="objective"><strong>01 / 협력의 이익</strong><p>평화 80점. 다른 나라의 선택이 우리의 이익을 바꿉니다.</p></div><div class="objective"><strong>02 / 안보 딜레마</strong><p>핵 60점. 함께 무장할수록 모두의 안전이 흔들립니다.</p></div><div class="objective"><strong>03 / 힘의 불균형</strong><p>같은 출발 점수, 다른 특권. 국력이 협상을 바꿉니다.</p></div></div>`;}
+function situation(g){const exposed=(tS?.teams||[]).filter(t=>t.exposed).length;
+ const title=g.status!=='playing'?'회의가 끝났습니다':g.phase==='negotiation'?'협상의 시간이 열렸습니다':g.phase==='submit'?'각국의 결정을 기다립니다':g.phase==='result'?'결정의 결과를 확인하세요':'국제회의 개회를 준비합니다';
+ const detail=g.status!=='playing'?'이제 각국의 선택을 돌아보세요. 우리에게 합리적이었던 선택은 모두에게도 합리적이었나요?':exposed?`핵실험 탐지 ${exposed}개국. 공개된 정보와 약속의 신뢰성을 다시 점검하세요.`:g.phase==='submit'?'카드는 비공개로 제출됩니다. 공개된 평화 포인트만으로 상대의 선택을 단정할 수 없습니다.':'강대국·중견국·약소국의 이해관계가 만나는 자리. 협력의 가능성과 갈등의 원인을 살펴보세요.';
+ return `<section class="situation"><div><div class="eyebrow">국제정세 브리핑 / ${PHASE_KO[g.phase]||'회의'}</div><h2>${title}</h2><p>${detail}</p></div></section>`;
+}
+function advice(role,g,st){
+ if(g.status!=='playing')return '우리의 선택이 다른 나라에 어떤 영향을 주었는지 되짚어 봅시다. 안전을 위한 선택이 모두의 불안으로 이어지지는 않았나요?';
+ if(role==='foreign')return g.phase==='negotiation'?'다른 나라에 평화 선택을 제안해 보세요. 약속을 지키도록 설득할 근거와, 약속을 어겼을 때의 대응을 함께 생각하세요.':'평화의 기본 이득은 6에서 이번 핵개발국 수를 뺀 값입니다. 협력하는 나라가 많을수록 평화 노선의 이득이 커집니다.';
+ if(role==='defense')return st.nuke_pts>=35?'핵 포인트가 40을 넘으면 핵실험이 탐지됩니다. 다른 나라의 평화가 8씩 줄어드는 파장까지 검토하세요.':'핵개발은 핵 +6, 평화 +3입니다. 그러나 두 나라가 같은 회의에서 핵 60에 도달하면 모두 패배합니다. 상대의 진행 상황은 확실하지 않습니다.';
+ if(role==='intel')return me?.tier==='강대국'?'지목은 상대의 이번 선택에 달려 있습니다. 핵개발이면 적중하지만, 평화면 우리 −4, 중립이면 우리 −10입니다. 추측과 확인된 정보를 구분하세요.':'첩보는 상대의 이번 선택과 핵 포인트를 알려 줍니다. 핵개발이면 우리 평화 +5, 아니면 −5입니다. 알아낸 정보를 누구와 공유할지도 전략입니다.';
+ if(g.phase==='negotiation')return '외교장관은 협상안을, 국방장관은 안보 위험을, 정보장관은 근거를 제시해 주세요. 최종 선택은 모둠 전체가 합의합니다.';
+ if(st.my_card)return '우리의 결정은 전달되었습니다. 다른 대표부의 선택을 기다리며, 약속과 실제 결과가 일치하는지 확인합시다.';
+ return '우리의 안전과 모두의 평화가 같은 방향인지 생각해 봅시다. 장관들의 관점을 검토하고, 이번 회의의 카드를 함께 결정하세요.';
+}
+function commandBrief(g,st){briefContext={g,st};const i=leaderIndex(me.country),l=LEADERS[i];return `<section class="command-brief">${portrait(i)}<div class="command-copy"><div class="eyebrow">${esc(me.country||'국가 배정 대기')} / 대표부 전략회의</div><h2>${l.name}<span>${l.title}</span></h2><p id="advisor-quote" class="quotation" aria-live="polite">${advice(currentRole,g,st)}</p><div class="role-tabs" aria-label="역할별 관점">${Object.entries(ROLES).map(([k,v])=>`<button type="button" class="role-tab" data-role="${k}" aria-pressed="${currentRole===k}">${v}</button>`).join('')}</div><div class="brief-note">역할을 눌러 관점을 확인하세요 · 공통 규칙에 따른 조언</div></div></section>`;}
+function policyDecoration(c){const index=CARDS.indexOf(c),effects=['평화 +6 − 핵개발국 수','평화 +4 / 핵 +2','평화 +3 / 핵 +6'];return `<span class="policy-icon" aria-hidden="true">${['◇','⚖','⚛'][index]}</span><div class="policy-code">POLICY / 0${index+1}</div><div class="t">${c.k}</div><div class="d">${c.d}</div><div class="policy-effect">${effects[index]}</div>`;}
+function showDemo(){
+ const c=COUNTRIES[demoNation];me={country:c.n,tier:c.t,group_label:'체험 대표부'};
+ const g={round_no:4,max_turns:15,phase:'submit',status:'playing',last_k:1};
+ const st={peace_pts:20,nuke_pts:12,my_card:null,exposed:[],spy_results:[],sanction_results:[],sanctions_left:2,spy_left:2,roster:COUNTRIES.filter(x=>x.n!==c.n).map((x,i)=>({id:String(i),country:x.n})),submitted:3,total:6};
+ drawStudent('DEMO',g,st);
+ const marker=document.createElement('div');marker.className='demo-banner';marker.innerHTML=`<span><b>전략실 체험</b> · 예시 점수이며 실제 게임에 제출되지 않습니다.</span><label style="margin:0">체험 국가 <select id="demo-country">${COUNTRIES.map((x,i)=>`<option value="${i}"${i===demoNation?' selected':''}>${x.n}</option>`).join('')}</select></label><button class="btn ghost" id="demo-teacher">의장석 보기</button>`;
+ app.querySelector('.topbar').after(marker);
+ document.getElementById('demo-country').onchange=e=>{demoNation=+e.target.value;showDemo();};
+ on('demo-teacher',showTeacherDemo);
+}
+function showPolicyDemo(k){const c=CARDS.find(x=>x.k===k);openGameDialog(`${k} 카드 · 체험`,`${policyDecoration(c)}<p class="note">실제 게임에서는 모둠이 합의한 뒤 카드를 한 번 제출합니다. 체험에서는 서버로 제출하거나 점수를 변경하지 않습니다.</p><p>지목·첩보와 상대 국가의 선택에 따라 최종 결과가 달라집니다. 실제 수업은 처음 화면에서 모둠 코드로 입장하세요.</p>`);}
+function showTeacherDemo(){
+ tS={game:{round_no:4,max_turns:15,phase:'submit',status:'playing',title:'국제사회 모의회의 · 체험',last_k:1},teams:COUNTRIES.map((c,i)=>({id:i,country:c.n,tier:c.t,group_label:`${i+1}모둠`,peace_pts:[20,17,23,21,19,18][i],exposed:false,sanctions_left:2,spy_left:2,join_code:'체험'})),submitted:[0,2,4]};
+ drawTeacher('DEMO');
+ const marker=document.createElement('div');marker.className='demo-banner';marker.innerHTML='<span><b>의장석 체험</b> · 가상 데이터입니다. 진행·공개·인쇄 기능은 실제 수업에서 사용하세요.</span><button class="btn ghost" id="demo-back">대표부로 돌아가기</button>';
+ app.querySelector('.topbar').after(marker);on('demo-back',showDemo);
+ ['bNeg','bSub','bEnd','bNext','bPrint','bRev','unN','unP'].forEach(id=>{const b=document.getElementById(id);if(b){b.disabled=true;b.onclick=null;}});
+}
+
+/* ══════════ 라우팅 ══════════ */
+function route(){h=H();clearInterval(tT);clearInterval(sT);
+  if(h.demo)return showDemo();
+  if(!KEY)return keyScreen();
+  if(h.n)return newGame();
+  if(h.t)return teacher(h.t);
+  if(h.s)return student(h.s);
+  home();}
+window.addEventListener('hashchange',route);
+route();
+</script>
+</body>
+</html>
