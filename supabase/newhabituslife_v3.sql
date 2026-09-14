@@ -1,33 +1,4 @@
--- Isolated online rooms for /newhabituslife. Does not alter lg2_* or RPG data.
--- The room host is the trusted game referee. Students can only enqueue their own actions.
-create table public.nlh_rooms (
- code text primary key,
- host_token uuid not null default gen_random_uuid(),
- state jsonb not null default '{"phase":"lobby"}',
- version integer not null default 0,
- created_at timestamptz not null default now(),
- touched_at timestamptz not null default now()
-);
-create table public.nlh_members (
- room text references public.nlh_rooms(code) on delete cascade,
- seat integer not null check (seat between 0 and 5),
- name text not null check (char_length(name) between 1 and 12),
- token uuid not null default gen_random_uuid(),
- primary key(room,seat),unique(token)
-);
-create table public.nlh_actions (
- id bigint generated always as identity primary key,
- room text not null references public.nlh_rooms(code) on delete cascade,
- seat integer not null,
- action jsonb not null,
- nonce uuid not null unique,
- created_at timestamptz not null default now()
-);
-create index nlh_actions_room_idx on public.nlh_actions(room,id);
-alter table public.nlh_rooms enable row level security;
-alter table public.nlh_members enable row level security;
-alter table public.nlh_actions enable row level security;
-revoke all on public.nlh_rooms,public.nlh_members,public.nlh_actions from anon,authenticated;
+-- Upgrade existing isolated rooms for v2/v3 actions.
 create or replace function public.nlh_room(p_op text,p_code text default '',p_token uuid default null,p_data jsonb default '{}')
 returns jsonb language plpgsql security definer set search_path='' as $$
 declare r public.nlh_rooms; m public.nlh_members; c text; seatno int; members jsonb; pending jsonb; is_host boolean; a jsonb;
