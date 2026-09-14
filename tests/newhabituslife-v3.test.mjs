@@ -1,0 +1,20 @@
+import assert from 'node:assert/strict';
+import {newGame,transition,wealth,receivable,outstanding,fate,contextOf,snapshotTax,upgradeGame,aiAction} from '../newhabituslife/engine.mjs';
+let g=newGame(['A','B'],{seed:31});
+const act=(type,value,actor=0)=>g=transition(g,{...contextOf(g),actor,type,value});
+g.phase='choice';g.event={type:'market',id:'1:0'};const sum=g.players.reduce((s,p)=>s+wealth(p),0);
+act('choose','loan');act('target',1);act('rate',20);act('respond','yes',1);
+assert.equal(outstanding(g.players[0]),240);assert.equal(receivable(g.players[1]),240);assert.equal(g.players.reduce((s,p)=>s+wealth(p),0),sum);assert.equal(g.players[0].everDebt,true);
+g.turn=0;g.phase='roll';act('roll');assert.equal(outstanding(g.players[0]),190);assert.equal(receivable(g.players[1]),190);
+g.phase='choice';g.event={type:'market',id:'1:0'};act('choose','insure');assert.equal(g.players[0].insurance,150);
+g.round=3;g.phase='forecast';g.forecasts={};act('forecast','up');act('forecast','down',1);assert.equal(g.phase,'crisis');assert.equal(g.players[0].insurance,0);assert.ok(g.crisis.hits[0].covered>0);assert.throws(()=>act('ack',null,1));act('ack');
+g=newGame(['A','B'],{seed:3});g.phase='choice';g.event={type:'learn',id:'1:0',shared:[]};g.players[0].cards=['친구'];g.players[1].cards=['멘토'];const stale={...contextOf(g),actor:1,type:'share',value:'ged'};g.turn=1;assert.throws(()=>transition(g,stale));g.turn=0;g=transition(g,stale);assert.ok(g.event.shared.includes('ged'));assert.equal(g.players[1].shared,1);
+act('promise',{to:1,text:'도움을 기억할게요'});act('keep',0,1);assert.throws(()=>act('promise',{to:1,text:'반복'}));
+const a=newGame(['A','B'],{seed:99,backgrounds:[0,2]}),b=newGame(['A','B'],{seed:99,backgrounds:[2,0]});b.seed=123456;
+for(let r=1;r<=12;r++)for(let i=0;i<2;i++)for(const k of ['dice','event','market','business','crisis'])assert.equal(fate(a,k,r,i),fate(b,k,r,i));
+a.players.forEach(p=>p.cash=500);snapshotTax(a);assert.deepEqual(a.taxRates,[.05,.05]);
+const legacy=structuredClone(g);legacy.version=2;legacy.players.forEach(p=>{delete p.receivables;delete p.insurance;});assert.equal(upgradeGame(legacy).version,3);
+// Force final insolvency: outstanding loan and matching claim are written off consistently.
+g=newGame(['A','B'],{seed:8});g.phase='choice';g.event={type:'market',id:'1:0'};act('choose','loan');act('target',1);act('rate',30);act('respond','yes',1);g.players[0].cash=0;g.players[0].debt=1000;g.round=8;g.phase='forecast';g.forecasts={};act('forecast','up');act('forecast','down',1);assert.equal(g.phase,'done');assert.equal(outstanding(g.players[0]),0);assert.equal(receivable(g.players[1]),0);assert.equal(g.players[1].defaultLoss,260);
+assert.deepEqual(g.history.at(-1).assets,g.players.map(wealth));
+console.log('PASS: loan accounting/repayment/default, insurance, stale-action rejection, promises, replay randomness, equal tax rates and save migration.');
