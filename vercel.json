@@ -1,7 +1,20 @@
 {
   "rewrites": [
-    { "source": "/foreignpolicy", "destination": "/foreignpolicy/index.html" },
-    { "source": "/newforeignpolicy", "destination": "/newforeignpolicy/index.html" },
-    { "source": "/newhabituslife", "destination": "/newhabituslife/index.html" }
-  ]
+    {
+      "source": "/foreignpolicy",
+      "destination": "/foreignpolicy/index.html"
+    },
+    {
+      "source": "/newforeignpolicy",
+      "destination": "/newforeignpolicy/index.html"
+    },
+    {
+      "source": "/newhabituslife",
+      "destination": "/newhabituslife/index.html"
+    }
+  ],
+  "framework": null,
+  "buildCommand": "",
+  "installCommand": "",
+  "outputDirectory": "."
 }
